@@ -109,7 +109,7 @@ $$\delta^L=\left(\begin{matrix}
 \nabla_{a^L_{m}}C
 \end{matrix}\right)\oplus\varphi'\left(Z^L\right),\tag{1}$$
 
-jossa $\nabla_{a^L_i} C$ voidaan ajatella virhefunktion gradienttivektoriksi, jossa elementit ovat virhefunktion osittaisderivaattoja $\frac{\partial C}{\partial a_{ij}^l}$.
+jossa $\nabla_{a^L_i} C$ voidaan ajatella virhefunktion gradienttivektoriksi, jossa elementit ovat virhefunktion osittaisderivaattoja $\frac{\partial C}{\partial a_{ij}^L}$.
 
 Operaatio $\oplus$ tarkoittaa ns. Hadamardin tuloa. Käytänössä siis matriisien _elementwise_ kertominen.
 
