@@ -1,5 +1,5 @@
 import numpy as np
-import AI.Activations as Activations
+import activations
 
 np.random.seed(0)
 
@@ -8,7 +8,7 @@ class Layer:
     self.n_input = n_input
     self.n_output = n_output
 
-    self.activation = Activations.name_to_class[activation]()
+    self.activation = activations.name_to_class[activation]()
     self.activation_name = activation
 
     if (weights is not None) and (np.array(weights).shape == (n_input, n_output)):
@@ -70,7 +70,7 @@ class NeuralNetwork:
     dW = []
     dB = []
 
-    N = len(Y)
+    M = len(Y)
 
     for l in self.layers:
       dW.append(np.zeros(l.weights.shape))
@@ -79,38 +79,52 @@ class NeuralNetwork:
     ls = self.layers
 
     delta = self.loss_prime(Y) * ls[-1].activation.prime(ls[-1].Z)
-    dB[-1] = 1/N * np.sum(delta, axis=0)
-    dW[-1] = 1/N * np.dot(ls[-2].output.T, delta)
+    dB[-1] = 1/M * np.sum(delta, axis=0)
+    dW[-1] = 1/M * np.dot(ls[-2].output.T, delta)
 
     for i in range(2, len(self.layers)):
       delta = ls[-i].activation.prime(ls[-i].Z) * np.dot(delta, ls[-i+1].weights.T)
-      dB[-i] = 1/N * np.sum(delta, axis=0)
-      dW[-i] = 1/N * np.dot(ls[-i-1].output.T, delta) 
+      dB[-i] = 1/M * np.sum(delta, axis=0)
+      dW[-i] = 1/M * np.dot(ls[-i-1].output.T, delta) 
 
     delta = ls[0].activation.prime(ls[0].Z) * np.dot(delta, ls[1].weights.T)
-    dB[0] = 1/N * np.sum(delta, axis=0)
-    dW[0] = 1/N * np.dot(np.array(self.input).T, delta)
+    dB[0] = 1/M * np.sum(delta, axis=0)
+    dW[0] = 1/M * np.dot(np.array(self.input).T, delta)
 
     return dW, dB
 
-  # y_hat is the expected result while y is the result from network
   def loss(self, Y):
-    return 0.5*np.sum((self.output-Y)**2)
+    return 1/(2*len(Y)) * np.sum((self.output-Y)**2)
 
   def loss_prime(self,Y):
-    return (self.output-Y)
+    return 1/len(Y) * (self.output-Y)
 
   # Batch is a tuple ([X], [Y]) where [X] is a matrix thats rows are one set of inputs
   #                                   [Y] is a matrix thats rows are the sets expected output 
-  def train(self, batch, eta):
+  # If mini_batch_size is not specified, it will use batch GD.
+  def train(self, batch, eta=0.1, mini_batch_size=0, epoch=1):
     X,Y = batch
-    self.forward(X)
-    self.cur_loss = self.loss(Y)
-    dW, dB = self.backprop(Y)
+    batch_size = len(X)
 
-    for l, dw, db in zip(self.layers, dW, dB):
-      l.weights -= eta * dw
-      l.biases -= eta * db
+    iterations = epoch
+
+    if mini_batch_size > 0:
+      iterations = epoch * (batch_size // mini_batch_size) 
+
+    for i in range(iterations):
+      if mini_batch_size != 0:
+        start_index = i % (batch_size // mini_batch_size) * mini_batch_size
+        end_index = start_index + mini_batch_size
+        X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
+      self.forward(X)
+      self.cur_loss = self.loss(Y)
+
+      dW, dB = self.backprop(Y)
+
+      for l, dw, db in zip(self.layers, dW, dB):
+        l.weights -= eta * dw
+        l.biases -= eta * db
+      print(f"Iteration: {i+1}/{iterations}, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
 
   def run(self, input):
     self.forward(input)
