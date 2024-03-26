@@ -21,7 +21,7 @@ w_{11}^l&\cdots&w_{1N_l}^l\\
 w_{N_{l-1}1}^l&\cdots&w^lN_{l-1}N_l
 \end{matrix}\right),$$
 
-jossa $w_{ij}^{l}$ viittaa $l-1$ tason $i$:nnen ja $l$ tason $j$:nnen neuronin väliseen painokertoimeen.
+jossa $w_{ij}^{l}$ viittaa $l-1$ kerroksen $i$:nnen ja $l$ kerroksen $j$:nnen neuronin väliseen painokertoimeen.
 
 Vastaavasti vakiotermit
 
@@ -37,11 +37,11 @@ a_{11}^{l-1}&\cdots&a_{1N_{l-1}}^{l-1}\\
 a_{m1}^{l-1}&\cdots&a_{mN_{l-1}}^{l-1}
 \end{matrix}\right),$$
 
-jossa $a^{l-1}_{ij}$ viittaa $l-1$ tason $j$:nnen neuronin aktivaatioon $i$:nnen opetussarjan (batch) opetusesimerkissä.
+jossa $a^{l-1}_{ij}$ viittaa $l-1$ kerroksen $j$:nnen neuronin aktivaatioon $i$:nnen opetussarjan (batch/mini-batch) opetusesimerkissä.
 
 > _Huom_. opetussarja koostuu $m$ opetusesimerkistä.
 
-Nyt saadaan tason $l$ painoitettu syöte (weighted input)
+Nyt saadaan kerroksen $l$ painoitettu syöte (weighted input)
 
 $$Z^l=A^{l-1}W^l+B^l=\left(\begin{matrix}
 z_{11}^l&\cdots&z_{1N_l}^l\\
@@ -52,23 +52,21 @@ z_{m1}^l&\cdots&z_{mN_l}^l
 >_Huom_. $B^l$ on $1 \times N_l$ kun taas $A^{l-1}W^l$ on $m \times N_l$. 
 <br>Kuitenkin esim. NumPy:ssa summaus tapahtuu siten, että vektori $B^l$ lisätään jokaiseen $A^{l-1}W^l$ riviin. 
 
-Kerroksen aktivaatio
+<br>
 
-$$A^l=\varphi_{l} (Z^l),$$
+Kerroksen $l$ aktivaatio
 
-jossa $\varphi_{l}$ on tason $l$ aktivointifunktio.
-
->_Huom_. Aktivointifunktio on _elementwise_, eli
-
->$$\varphi_l (Z^l)=\left(\begin{matrix}
+$$A^l=\varphi_{l} (Z^l)=\left(\begin{matrix}
 \varphi (z_{11}^l)&\cdots&\varphi (z_{1N_l}^l)\\
 \vdots&\ddots&\vdots\\
 \varphi (z_{m1}^l)&\cdots&\varphi (z_{mN_l}^l)
-\end{matrix}\right)$$
+\end{matrix}\right),$$
+
+jossa $\varphi_{l}$ on kerroksen $l$ aktivointifunktio.
 
 <br>
 
-Usein muissa teksteissä z-arvoja ja muita merkataan vain yhdellä indeksillä. Kuitenkin tässä tapauksessa kaikki pohjautuvat opetussarjoihin, jolloin yhden indeksin sijaan käytetään kahta. Ensimmäinen tyypillisesti kuvaa opetusesimerkin indeksiä ja toinen varsinaisen arvon indeksiä.
+Usein muissa teksteissä $z$-arvoja ja muita merkataan vain yhdellä indeksillä. Kuitenkin tässä tapauksessa kaikki pohjautuvat opetussarjoihin, jolloin yhden indeksin sijaan käytetään kahta. Ensimmäinen tyypillisesti kuvaa opetusesimerkin indeksiä ja toinen varsinaisen arvon indeksiä.
 
 >Esim. $z_{ij}^{l}$ kuvastaa opetussarjan $i$:nnestä opetusesimerkistä tason $l$ neuronin $j$ painottetua arvoa.
 
@@ -76,13 +74,13 @@ Usein muissa teksteissä z-arvoja ja muita merkataan vain yhdellä indeksillä. 
 
 #### Virhefunktiosta hieman
 
-Olkoon $C$ virhefunktio, jonka tehtävä on määrittää neuroverkon toiminnan laatu.
+Olkoon $C$ virhefunktio, jonka tehtävä on arvioida neuroverkon toiminnan laatua.
 <br>
 Virhefunktio voi esimerkiksi olla:
 
 $$C=\frac{1}{2m}\sum_{k=1}^{m}||A_k^L-Y_k||^2,$$
 
-jossa $Y_k$ on $k$:nnen opetusesimerkin haluttu vastaus ja $||A_k^L-Y_k||^2=\sum_{t=1}^{N_L} (a_{kt}^L-y_{kt})^2$ (ns. erotuksen euklidisen normin neliö)
+jossa $Y_k$ on $k$:nnen opetusesimerkin odotettu arvo ja $||A_k^L-Y_k||^2=\sum_{t=1}^{N_L} (a_{kt}^L-y_{kt})^2$ (ns. erotuksen euklidisen normin neliö)
 
 <br>
 
@@ -162,7 +160,16 @@ Kaavoista nähdään, että $\delta^l$-termejä hyödynnetään aina edellisess�
 <br>
 Siispä neuroverkon iterointi käänteisessä järjestyksessä on luontevampaa ja tehokkaampaa.
 <br>
-Vastavirta-algoritmissa yhden kerroksen kohdalla täytyy:
+Vastavirta-algoritmissa jokaisen kerroksen kohdalla täytyy:
 
 1. Laskea kerrosta vastaava $\delta^l$-arvo hyödyntäen aikaisemman kerroksen $\delta^{l-1}$-arvoa.
 2. Laskea kerrosta vastaavat $\frac{\partial C}{\partial W^l}$ ja $\frac{\partial C}{\partial B^l}$
+3. Päivittää painokertoimia ja vakiotermejä, jolloin $W^l=W_{\text{ennen}}^l-\eta\frac{\partial C}{\partial W^L}$ ja $B^l=B_{\text{ennen}}^l-\eta\frac{\partial C}{\partial B^l}$
+
+### Lähteitä:
+
+1. [Johdatus tekoälyn taustalla olevaan matematiikkaan, Heli Tuominen](https://tim.jyu.fi/view/143092#DKUvbnUuGytQ)
+
+2. [How the backpropagation algorithm works, Michael Nielsen](http://neuralnetworksanddeeplearning.com/chap2.html)
+
+
