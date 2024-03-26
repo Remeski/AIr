@@ -98,7 +98,7 @@ Merkataan kuitenkin arvoa mieluummin $\delta_{ij}^L$ , jossa $i$ viittaa opetuse
 <br>
 Huomaa $\frac{\partial C}{\partial a_{ij}^L}$ tarkoittaa itse virhefunktion derivaattaa. 
 <br>
-Edellä mainitun virhefunktion tapauksessa se olisi $\frac{\partial C}{\partial a_{ij}^L}=\frac{1}{m}(a_{ij}^l-y_{ij})$
+Edellä mainitun virhefunktion tapauksessa se olisi $\frac{\partial C}{\partial a_{ij}^L}=\frac{1}{m}(a_{ij}^L-y_{ij})$
 
 Sama voidaan esittää matriiseilla.
 
