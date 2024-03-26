@@ -1,18 +1,19 @@
 # a breath of fresh AIr 🌪️
 
-Neuroverkkoja n stuff.
+## Mistä kyse?
 
-Your classic pytorch, tensorflow knockoff.
+- Neuroverkkoja n stuff.
+- Your classic pytorch, tensorflow knockoff (sucky at best).
+- Tää on ihan vaa demo.
+- Eräänlainen harjoits/kokeilu neuroverkkojen parissa.
 
-### Vähän matematiikaa
+## Vähän matematiikaa
 
-##### Aluksi perusjutut
+### Aluksi perusjuttuja (määritelmiä)
 
-Olkoon $N_l$ tason $l$ neuronien lukumäärä.
+Olkoon $l$ neuroverkossa oleva kerros, $N_l$ tason $l$ neuronien lukumäärä, $L$ ulostulokerros. 
 
-Olkoon $L$ ulostulokerros.
-
-Olkoon painokertoimet $l$ kerrokselle
+Olkoon $l$ kerroksen painokertoimet 
 
 $$W^l=\left(\begin{matrix}
 w_{11}^l&\cdots&w_{1N_l}^l\\
@@ -33,14 +34,14 @@ Lisäksi edellisen kerroksen $l-1$ aktivaatio
 $$A^{l-1}=\left(\begin{matrix}
 a_{11}^{l-1}&\cdots&a_{1N_{l-1}}^{l-1}\\
 \vdots&\ddots&\vdots\\
-a_{m1}^{l-1}&\cdots&a^{l-1}_{mN_{l-1}}
+a_{m1}^{l-1}&\cdots&a_{mN_{l-1}}^{l-1}
 \end{matrix}\right),$$
 
 jossa $a^{l-1}_{ij}$ viittaa $l-1$ tason $j$:nnen neuronin aktivaatioon $i$:nnen opetussarjan (batch) opetusesimerkissä.
 
 > _Huom_. opetussarja koostuu $m$ opetusesimerkistä.
 
-Nyt saadaan tason $l$ painoitettu sisääntulo (weighted input)
+Nyt saadaan tason $l$ painoitettu syöte (weighted input)
 
 $$Z^l=A^{l-1}W^l+B^l=\left(\begin{matrix}
 z_{11}^l&\cdots&z_{1N_l}^l\\
@@ -57,37 +58,47 @@ $$A^l=\varphi_{l} (Z^l),$$
 
 jossa $\varphi_{l}$ on tason $l$ aktivointifunktio.
 
->_Huom_. Aktivointifunktio on _elementwise_, eli <br>
-$\varphi_l (Z^l)=\left(\begin{matrix}\varphi (z^{l}_{11})&\cdots&\varphi (z^l_{1N_{l}})\\\vdots&\ddots&\vdots\\\varphi (z^{l}_{m1})&\dots&\varphi (z^l_{1N_{l}})\\\end{matrix}\right)$
+>_Huom_. Aktivointifunktio on _elementwise_, eli
+
+>$$\varphi_l (Z^l)=\left(\begin{matrix}
+\varphi (z_{11}^l)&\cdots&\varphi (z_{1N_l}^l)\\
+\vdots&\ddots&\vdots\\
+\varphi (z_{m1}^l)&\cdots&\varphi (z_{mN_l}^l)
+\end{matrix}\right)$$
 
 <br>
 
 Usein muissa teksteissä z-arvoja ja muita merkataan vain yhdellä indeksillä. Kuitenkin tässä tapauksessa kaikki pohjautuvat opetussarjoihin, jolloin yhden indeksin sijaan käytetään kahta. Ensimmäinen tyypillisesti kuvaa opetusesimerkin indeksiä ja toinen varsinaisen arvon indeksiä.
 
-
 >Esim. $z_{ij}^{l}$ kuvastaa opetussarjan $i$:nnestä opetusesimerkistä tason $l$ neuronin $j$ painottetua arvoa.
 
 <br>
 
-##### Virhefunktiosta hieman
+#### Virhefunktiosta hieman
 
-Olkoon $C$ virhefunktio, jonka tehtävä on määrittää neuroverkon toiminnan laatua.
-
+Olkoon $C$ virhefunktio, jonka tehtävä on määrittää neuroverkon toiminnan laatu.
+<br>
 Virhefunktio voi esimerkiksi olla:
 
-$$C=\frac{1}{2}\sum_{k \in Y}(a^L_k-y_k)^2,$$
+$$C=\frac{1}{2m}\sum_{k=1}^{m}||A_k^L-Y_k||^2,$$
 
-jossa $Y$ on joukko opetusesimerkkien vastuksia. 
+jossa $Y_k$ on $k$:nnen opetusesimerkin haluttu vastaus ja $||A_k^L-Y_k||^2=\sum_{t=1}^{N_L} (a_{kt}^L-y_{kt})^2$ (ns. erotuksen euklidisen normin neliö)
 
-##### Vastavirtamenetelmän neljä tärkeää derivaattaa 
+<br>
+
+#### Vastavirtamenetelmän neljä tärkeää derivaattaa 
 
 Tarkastellaan kuinka $L$ kerroksen painoitettu sisääntulo (weighted input) vaikuttaa virhefunktioon.
-
+<br>
 $$\frac{\partial C}{\partial z^L_{ij}}=\frac{\partial C}{\partial a^L_{ij}} \frac{\partial a^L_{ij}}{\partial z^L_{ij}}=\frac{\partial C}{\partial a^L_{ij}} \varphi '(z^L_{ij})$$
-
+<br>
 Tätä arvoa usein nimitetään $L$ kerroksen $j$:nnen neuronin aiheuttamaksi virheeksi, jota usein merkataan $\delta_j^L$.
-
+<br>
 Merkataan kuitenkin arvoa mieluummin $\delta_{ij}^L$ , jossa $i$ viittaa opetusesimerkkiin.
+<br>
+Huomaa $\frac{\partial C}{\partial a_{ij}^L}$ tarkoittaa itse virhefunktion derivaattaa. 
+<br>
+Edellä mainitun virhefunktion tapauksessa se olisi $\frac{\partial C}{\partial a_{ij}^L}=\frac{1}{m}(a_{ij}^l-y_{ij})$
 
 Sama voidaan esittää matriiseilla.
 
@@ -104,8 +115,10 @@ Operaatio $\oplus$ tarkoittaa ns. Hadamardin tuloa. Käytänössä siis matriisi
 
 Tarkastellaan seuraavaksi kuinka $l$ kerroksen $z_{j}^{l}$ vaikuttaa virhefunktioon.
 
-$$\begin{align}\delta_{ij}^l&=\frac{\partial C}{\partial z_{ij}^{l}}=\sum_{k=1}^{N_{l+1}}\frac{\partial C}{\partial z_{ik}^{l+1}} \frac{\partial z_{ik}^{l+1}}{\partial z_{ij}^l}=\sum_{k=1}^{N_{l+1}}\delta_{ik}^{l+1} \frac{\partial z_{ik}^{l+1}}{\partial z_{ij}^l}\notag\\
-&=\varphi'(z_{ij}^l)\sum_{k=1}^{N_{l+1}}\delta_{ik}^{l+1}w_{jk}^{l+1}\notag\end{align}$$
+$$\begin{align}
+\delta_{ij}^l&=\frac{\partial C}{\partial z_{ij}^{l}}=\sum_{k=1}^{N_{l+1}}\frac{\partial C}{\partial z_{ik}^{l+1}} \frac{\partial z_{ik}^{l+1}}{\partial z_{ij}^l}=\sum_{k=1}^{N_{l+1}}\delta_{ik}^{l+1} \frac{\partial z_{ik}^{l+1}}{\partial z_{ij}^l}\\
+&=\varphi'(z_{ij}^l)\sum_{k=1}^{N_{l+1}}\delta_{ik}^{l+1}w_{jk}^{l+1}
+\end{align}$$
 
 Sama voidaan esittää matriiseilla.
 
@@ -113,8 +126,10 @@ $$\delta^{l}=\varphi'(Z^l) \oplus \delta^{l+1}(W^{l+1})^T\tag{2}$$
 
 Lopulta saadaan virhefunktion osittaisderivaatat painokertoimien $w_{ij}^{l}$ ja vakiotermien $b_{j}^l$ suhteen.
 
-$$\begin{align}\frac{\partial C}{\partial w_{ij}^{l}}&=\frac{1}{m}\sum_{k=1}^{m}\delta^{l}_{kj}a_{ki}^{l-1}\notag\\
-\frac{\partial C}{\partial b_{j}^{l}}&=\frac{1}{m}\sum_{k=1}^{m}\delta_{kj}^l\notag\end{align}$$
+$$\begin{align}
+\frac{\partial C}{\partial w_{ij}^{l}}&=\frac{1}{m}\sum_{k=1}^{m}\delta_{kj}^{l}a_{ki}^{l-1}\\
+\frac{\partial C}{\partial b_{j}^{l}}&=\frac{1}{m}\sum_{k=1}^{m}\delta_{kj}^l
+\end{align}$$
 
 Sama voidaan esittää matriiseilla.
 
@@ -127,24 +142,26 @@ Näin saadut matriisit ovat siis opetusesimerkkien painokertoimien ja vakiotermi
 
 Kootaan vielä nämä neljä lauseketta.
 
-
 $$\begin{align}\delta^L&=\left(\begin{matrix}
 \nabla_{a^L_{1}}C\\
 \nabla_{a^L_{2}}C\\
 \vdots\\
 \nabla_{a^L_{m}}C
-\end{matrix}\right)\oplus\varphi'\left(Z^L\right)\tag{1}\\\notag\\
-\delta^{l}&=\varphi'(Z^l) \oplus \delta^{l+1}(W^{l+1})^T\tag{2}\\\notag\\
-\frac{\partial C}{\partial W^l}&=\frac{1}{m}(A^{l-1})^T\delta^l\tag{3}\\\notag\\
+\end{matrix}\right)\oplus\varphi'\left(Z^L\right)\tag{1}\\
+\quad\\
+\delta^{l}&=\varphi'(Z^l) \oplus \delta^{l+1}(W^{l+1})^T\tag{2}\\
+\quad\\
+\frac{\partial C}{\partial W^l}&=\frac{1}{m}(A^{l-1})^T\delta^l\tag{3}\\
+\quad\\
 \frac{\partial C}{\partial B^l}&=\frac{1}{m}\delta^l\tag{4}\\
 \end{align}$$
 
-#### Vastavirtamenetelmä
+### Vastavirta-algoritmi
 
 Kaavoista nähdään, että $\delta^l$-termejä hyödynnetään aina edellisessä $l-1$ kerroksen derivaatoissa.
-
+<br>
 Siispä neuroverkon iterointi käänteisessä järjestyksessä on luontevampaa ja tehokkaampaa.
-
+<br>
 Vastavirta-algoritmissa yhden kerroksen kohdalla täytyy:
 
 1. Laskea kerrosta vastaava $\delta^l$-arvo hyödyntäen aikaisemman kerroksen $\delta^{l-1}$-arvoa.
