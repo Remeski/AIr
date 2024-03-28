@@ -1,5 +1,7 @@
 import numpy as np
-import activations
+from . import activations
+import math
+import time
 
 np.random.seed(0)
 
@@ -102,7 +104,7 @@ class NeuralNetwork:
   # Batch is a tuple ([X], [Y]) where [X] is a matrix thats rows are one set of inputs
   #                                   [Y] is a matrix thats rows are the sets expected output 
   # If mini_batch_size is not specified, it will use batch GD.
-  def train(self, batch, eta=0.1, mini_batch_size=0, epoch=1):
+  def train(self, batch, eta=0.1, gamma=0, mini_batch_size=0, epoch=1, fn=lambda self: None):
     X,Y = batch
     batch_size = len(X)
 
@@ -111,20 +113,44 @@ class NeuralNetwork:
     if mini_batch_size > 0:
       iterations = epoch * (batch_size // mini_batch_size) 
 
-    for i in range(iterations):
-      if mini_batch_size != 0:
-        start_index = i % (batch_size // mini_batch_size) * mini_batch_size
-        end_index = start_index + mini_batch_size
-        X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
-      self.forward(X)
-      self.cur_loss = self.loss(Y)
+    self.prev_dW = np.zeros(len(self.layers))
+    self.prev_dB = np.zeros(len(self.layers))
 
-      dW, dB = self.backprop(Y)
+    try:
+      for i in range(iterations):
+        if mini_batch_size != 0:
+          start_index = i % (batch_size // mini_batch_size) * mini_batch_size
+          end_index = start_index + mini_batch_size
+          X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
+        self.forward(X)
+        self.cur_loss = self.loss(Y)
 
-      for l, dw, db in zip(self.layers, dW, dB):
-        l.weights -= eta * dw
-        l.biases -= eta * db
-      print(f"Iteration: {i+1}/{iterations}, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
+        dW, dB = self.backprop(Y)
+
+
+        _prev_dW = []
+        _prev_dB = []
+        for l, dw, db, dw2, db2 in zip(self.layers, dW, dB, self.prev_dW, self.prev_dB):
+          # print("dw", end="\r" if i != iterations-1 else "\n")
+          # print(dw, end="\r" if i != iterations-1 else "\n")
+          # print("db", end="\r" if i != iterations-1 else "\n")
+          # print(db, end="\r" if i != iterations-1 else "\n")
+          w_inc = -(eta * dw + gamma * dw2)
+          b_inc = -(eta * db + gamma * db2)
+          _prev_dW.append(w_inc)
+          _prev_dB.append(b_inc)
+          l.weights += w_inc
+          l.biases += b_inc
+
+        self.prev_dW = _prev_dW
+        self.prev_dB = _prev_dB
+
+        fn(self)
+
+        print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
+
+    except KeyboardInterrupt:
+        print(f"\nStopped at loss {round(self.cur_loss,9)}")
 
   def run(self, input):
     self.forward(input)

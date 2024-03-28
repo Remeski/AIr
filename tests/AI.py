@@ -9,7 +9,7 @@ from activations import Sigmoid
 
 test_schema = { "n_input": 3, "layers": [{"n": 3, "activation": "ReLU"}, {"n": 5, "activation": "ReLU"}, {"n": 1, "activation": "Linear"}] }
 
-test_schema_sin = { "n_input": 1, "layers": [{"n": 100, "activation": "ReLU"}, {"n": 100, "activation": "ReLU"}, {"n": 1, "activation": "Linear"}] }
+test_schema_sin = { "n_input": 1, "layers": [{"n": 20, "activation": "Sigmoid"}, {"n": 1, "activation": "Linear"}] }
 
 test_schema_xor = { "n_input": 2, "layers": [{"n": 20, "activation": "ReLU"}, {"n": 1, "activation": "Linear"}] }
 
@@ -18,13 +18,13 @@ def batch_xor():
 
 _batch_sin = ()
 
-def batch_sin(n, _range=20): 
+def batch_sin(n): 
   global _batch_sin
   if len(_batch_sin) == 0 or n != len(_batch_sin[0]):
     X = []
     Y = []
     for _ in range(0,n):
-      x = random.random() * random.randint(0, _range)
+      x = random.random() ** 2 * 2 * math.pi
       X.append([x])
       Y.append([math.sin(x)])
     _batch_sin = (X, Y)
