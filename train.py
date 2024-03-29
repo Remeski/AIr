@@ -8,8 +8,8 @@ def split_dataset(dataset, split):
   test_Y = []
   X = []
   Y = []
-  for x,y in dataset:
-    if random.random() > split:
+  for x,y in zip(dataset[0], dataset[1]):
+    if random.random() < split:
       test_X.append(x)
       test_Y.append(y)
     X.append(x)
@@ -38,7 +38,7 @@ class Trainer:
     eta = self.eta if self.eta is not None else 0.1
 
     if self.loss < 10**(-3):
-      eta *= (1/2) * self.training_count
+      eta *= 1/2
 
     return eta 
 
@@ -55,7 +55,7 @@ class Trainer:
   # gamma = momentum, if None => automatic
   # mini_batch_size = if None => automatic
   # noise = added randomness to dataset
-  def train(self, dataset, split=0.9, epoch=None, eta=None, gamma=None, mini_batch_size=0, noise=0):
+  def train(self, dataset, split=0.9, epoch=None, eta=None, gamma=None, mini_batch_size=0, noise=0.0):
     self.eta = eta
     self.gamma = gamma
     self.epoch = epoch
@@ -72,17 +72,18 @@ class Trainer:
 
     training = True
 
-    self.training_count = 0
+    self.loss = 100
 
-    while training:
-      self.eta = self.calculate_eta()
-      self.gamma = self.calculate_gamma()
-      self.epoch = self.calculate_epoch()
-      try:
+    try:
+      self.training_count = 0
+      while training:
+        self.eta = self.calculate_eta()
+        self.gamma = self.calculate_gamma()
+        self.epoch = self.calculate_epoch()
         k = 3
         self.training_count += 1
-        print(f"[train]-{convert_to_stamp(self.training_count)} Starting with eta {eta}, gamma {gamma} and epoch {epoch}") 
-        self.network.train(np.array(training_batch)+noise*random.choice([-1, 1])*random.random(), epoch=self.epoch, eta=self.eta, gamma=self.gamma, mini_batch_size=mini_batch_size)
+        print(f"[train]-{convert_to_stamp(self.training_count)} Starting with eta {self.eta}, gamma {self.gamma} and epoch {self.epoch}") 
+        self.network.train((np.array(training_batch[0])+noise*np.random.choice([-1, 1], size=np.array(training_batch[0]).shape)*np.random.rand(*np.array(training_batch[0]).shape), training_batch[1]), epoch=self.epoch, eta=self.eta, gamma=self.gamma, mini_batch_size=mini_batch_size)
 
         print(f"[train]-{convert_to_stamp(self.training_count)} Finished with loss {self.network.cur_loss}")
 
@@ -99,10 +100,9 @@ class Trainer:
             else:
               break
 
-      except KeyboardInterrupt:
-        self.network.store(file_path=self.file_path + f"-{convert_to_stamp(self.training_count)}")
-        training = False
+    except KeyboardInterrupt:
+      print("Stopping")
 
-      print(f"Finished training session")
-      self.network.store(file_path=self.file_path + f"-{convert_to_stamp(self.training_count)}")
+    print(f"Finished training session")
+    self.network.store(file_path=self.file_path + f"-{convert_to_stamp(self.training_count)}")
 
