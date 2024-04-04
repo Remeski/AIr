@@ -116,16 +116,18 @@ class NeuralNetwork:
     self.prev_dW = np.zeros(len(self.layers))
     self.prev_dB = np.zeros(len(self.layers))
 
+    if iterations < 1:
+      raise Exception(f"Invalid options, iterations: {iterations}")
+
     for i in range(iterations):
       if mini_batch_size != 0:
         start_index = i % (batch_size // mini_batch_size) * mini_batch_size
         end_index = start_index + mini_batch_size
         X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
+
       self.forward(X)
-      self.cur_loss = self.loss(Y)
 
       dW, dB = self.backprop(Y)
-
 
       _prev_dW = []
       _prev_dB = []
@@ -147,6 +149,8 @@ class NeuralNetwork:
       self.prev_dB = _prev_dB
 
       fn(self)
+
+      self.cur_loss = self.loss(Y)
 
       print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
 

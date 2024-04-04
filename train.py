@@ -3,6 +3,7 @@ from . import core
 import random
 import numpy as np
 
+# TODO: come up with a more clever way to do this
 def split_dataset(dataset, split):
   test_X = []
   test_Y = []
@@ -61,6 +62,10 @@ class Trainer:
     self.epoch = epoch
 
     training_batch, test_batch = split_dataset(dataset, split)
+
+    if len(training_batch[0]) < 1:
+      print("No training samples")
+      return
 
     training = True
 

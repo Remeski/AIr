@@ -26,14 +26,23 @@ class Linear:
 
 class Sigmoid:
   def prime(self, X):
-    return self.calc(X)**2*np.exp(-np.array(X))
+    S = self.calc(X)
+    return S*(1-S)
 
   def calc(self, X):
     return 1 / (1 + np.exp(-np.array(X)))
+
+class Gaussian:
+  def prime(self, X):
+    return 2*X*self.calc(X)
+
+  def calc(self, X):
+    return np.exp(-X**2)
 
 name_to_class = {
   "ReLU": ReLU,
   "LeakyReLU": LeakyReLU,
   "Linear": Linear,
-  "Sigmoid": Sigmoid
+  "Sigmoid": Sigmoid,
+  "Gaussian": Gaussian
 }
