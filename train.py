@@ -23,8 +23,8 @@ def convert_to_stamp(input: int, n=3):
 
 class Trainer:
   def __init__(self, schema=None, file_path=None):
-    if file_path is not None and os.path.isfile(file_path):
-      self.file_path = file_path
+    if file_path is not None and os.path.isfile(file_path if file_path.rfind(".npz") != -1 else file_path + ".npz"):
+      self.file_path = file_path.replace(".npz", "")
       self.network = core.NeuralNetwork.load_from_file(file_path)
     elif schema is None:
       print("Specify schema or file_path")
@@ -60,14 +60,6 @@ class Trainer:
     self.gamma = gamma
     self.epoch = epoch
 
-    # split_len = len(dataset[0]) * split
-    #
-    # np.random.shuffle(np.array(dataset))
-    #
-    # training_batch = (dataset[0][:split_len], dataset[1][:split_len])
-    #
-    # test_batch = (dataset[0][split_len:], dataset[1][split_len:])
-
     training_batch, test_batch = split_dataset(dataset, split)
 
     training = True
@@ -82,19 +74,19 @@ class Trainer:
         self.epoch = self.calculate_epoch()
         k = 3
         self.training_count += 1
-        print(f"[train]-{convert_to_stamp(self.training_count)} Starting with eta {self.eta}, gamma {self.gamma} and epoch {self.epoch}") 
+        print(f"[train-{convert_to_stamp(self.training_count)}] Starting with eta {self.eta}, gamma {self.gamma} and epoch {self.epoch}") 
         self.network.train((np.array(training_batch[0])+noise*np.random.choice([-1, 1], size=np.array(training_batch[0]).shape)*np.random.rand(*np.array(training_batch[0]).shape), training_batch[1]), epoch=self.epoch, eta=self.eta, gamma=self.gamma, mini_batch_size=mini_batch_size)
 
-        print(f"[train]-{convert_to_stamp(self.training_count)} Finished with loss {self.network.cur_loss}")
+        print(f"[train-{convert_to_stamp(self.training_count)}] Finished with loss {self.network.cur_loss}")
 
         self.loss = self.network.cur_loss
 
         if len(test_batch) > 0:
-          print(f"[perf]-{convert_to_stamp(self.training_count)} Evaluating")
+          print(f"[perf-{convert_to_stamp(self.training_count)}] Evaluating")
           self.loss = self.network.test_loss(test_batch)
-          print(f"[perf]-{convert_to_stamp(self.training_count)} loss is {self.loss}")
+          print(f"[perf-{convert_to_stamp(self.training_count)}] loss is {self.loss}")
           if self.loss < 10**(-k):
-            c = input(f"[perf]-{convert_to_stamp(self.training_count)} Do you want to continue? Y/n")
+            c = input(f"[perf-{convert_to_stamp(self.training_count)}] Do you want to continue? Y/n")
             if c.lower() != "n":
               k += 3
             else:

@@ -1,12 +1,21 @@
 import numpy as np
 
-
 class ReLU:
   def prime(self, X):
     return (X > 0) * 1
 
   def calc(self, X):
     return np.maximum(0, X)
+
+class LeakyReLU:
+  def prime(self, X):
+    dx = np.ones_like(X)
+    dx[X < 0] = 0.01
+    return dx
+    # return (X > 0) * 1
+
+  def calc(self, X):
+    return np.maximum(0.01*X, X)
 
 class Linear:
   def prime(self, X):
@@ -24,6 +33,7 @@ class Sigmoid:
 
 name_to_class = {
   "ReLU": ReLU,
+  "LeakyReLU": LeakyReLU,
   "Linear": Linear,
   "Sigmoid": Sigmoid
 }

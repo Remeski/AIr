@@ -116,41 +116,42 @@ class NeuralNetwork:
     self.prev_dW = np.zeros(len(self.layers))
     self.prev_dB = np.zeros(len(self.layers))
 
-    try:
-      for i in range(iterations):
-        if mini_batch_size != 0:
-          start_index = i % (batch_size // mini_batch_size) * mini_batch_size
-          end_index = start_index + mini_batch_size
-          X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
-        self.forward(X)
-        self.cur_loss = self.loss(Y)
+    for i in range(iterations):
+      if mini_batch_size != 0:
+        start_index = i % (batch_size // mini_batch_size) * mini_batch_size
+        end_index = start_index + mini_batch_size
+        X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
+      self.forward(X)
+      self.cur_loss = self.loss(Y)
 
-        dW, dB = self.backprop(Y)
+      dW, dB = self.backprop(Y)
 
 
-        _prev_dW = []
-        _prev_dB = []
-        for l, dw, db, dw2, db2 in zip(self.layers, dW, dB, self.prev_dW, self.prev_dB):
-          # print("dw", end="\r" if i != iterations-1 else "\n")
-          # print(dw, end="\r" if i != iterations-1 else "\n")
-          # print("db", end="\r" if i != iterations-1 else "\n")
-          # print(db, end="\r" if i != iterations-1 else "\n")
-          w_inc = -(eta * dw + gamma * dw2)
-          b_inc = -(eta * db + gamma * db2)
-          _prev_dW.append(w_inc)
-          _prev_dB.append(b_inc)
-          l.weights += w_inc
-          l.biases += b_inc
+      _prev_dW = []
+      _prev_dB = []
+      for l, dw, db, dw2, db2 in zip(self.layers, dW, dB, self.prev_dW, self.prev_dB):
+        # print("dw", end="\r" if i != iterations-1 else "\n")
+        # print(dw, end="\r" if i != iterations-1 else "\n")
+        # print("db", end="\r" if i != iterations-1 else "\n")
+        # print(db, end="\r" if i != iterations-1 else "\n")
+        w_inc = -(eta * dw + gamma * dw2)
+        # w_inc = -(eta * dw)
+        b_inc = -(eta * db + gamma * db2)
+        # b_inc = -(eta * db)
+        _prev_dW.append(w_inc)
+        _prev_dB.append(b_inc)
+        l.weights += w_inc
+        l.biases += b_inc
 
-        self.prev_dW = _prev_dW
-        self.prev_dB = _prev_dB
+      self.prev_dW = _prev_dW
+      self.prev_dB = _prev_dB
 
-        fn(self)
+      fn(self)
 
-        print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
+      print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
 
-    except KeyboardInterrupt:
-        print(f"\nStopped at loss {round(self.cur_loss,9)}")
+    # except:
+    #     print(f"\nStopped at loss {round(self.cur_loss,9)}")
 
   def run(self, input):
     self.forward(input)
