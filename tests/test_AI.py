@@ -4,8 +4,8 @@ import unittest
 import math
 import random
 from numpy.random import bytes as randombytes
-import core as AI
-from activations import Sigmoid
+from src.AIr import core as AI
+from src.AIr.activations import Sigmoid
 
 test_schema = { "n_input": 3, "layers": [{"n": 3, "activation": "ReLU"}, {"n": 5, "activation": "ReLU"}, {"n": 1, "activation": "Linear"}] }
 
@@ -58,7 +58,7 @@ class TestAINeuralNetwork(unittest.TestCase):
 
     for _ in range(0, training_iterations):
       batch = batch_sin(batch_size)
-      network.train(batch, eta)
+      network.train(batch, silent=True, eta=eta)
 
     loss = network.test_loss(batch_sin(batch_size))
 
@@ -76,7 +76,7 @@ class TestAINeuralNetwork(unittest.TestCase):
     network = AI.NeuralNetwork(schema) 
 
     for _ in range(0, training_iterations):
-      network.train(batch_xor(), eta)
+      network.train(batch_xor(), silent=True, eta=eta)
 
     loss = network.test_loss(batch_xor())
 

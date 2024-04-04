@@ -104,7 +104,7 @@ class NeuralNetwork:
   # Batch is a tuple ([X], [Y]) where [X] is a matrix thats rows are one set of inputs
   #                                   [Y] is a matrix thats rows are the sets expected output 
   # If mini_batch_size is not specified, it will use batch GD.
-  def train(self, batch, eta=0.1, gamma=0, mini_batch_size=0, epoch=1, fn=lambda self: None):
+  def train(self, batch, silent=False, eta=0.1, gamma=0, mini_batch_size=0, epoch=1, fn=lambda self: None):
     X,Y = batch
     batch_size = len(X)
 
@@ -152,7 +152,8 @@ class NeuralNetwork:
 
       self.cur_loss = self.loss(Y)
 
-      print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
+      if not silent:
+        print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
 
     # except:
     #     print(f"\nStopped at loss {round(self.cur_loss,9)}")
