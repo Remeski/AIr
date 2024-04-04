@@ -1,7 +1,7 @@
 import os
-from . import core
 import random
 import numpy as np
+from .core import NeuralNetwork
 
 # TODO: come up with a more clever way to do this
 def split_dataset(dataset, split):
@@ -26,13 +26,13 @@ class Trainer:
   def __init__(self, schema=None, file_path=None):
     if file_path is not None and os.path.isfile(file_path if file_path.rfind(".npz") != -1 else file_path + ".npz"):
       self.file_path = file_path.replace(".npz", "")
-      self.network = core.NeuralNetwork.load_from_file(file_path)
+      self.network = NeuralNetwork.load_from_file(file_path)
     elif schema is None:
       print("Specify schema or file_path")
       return
     else:
       self.file_path = file_path if file_path is not None else "data.npz"
-      self.network = core.NeuralNetwork(schema)
+      self.network = NeuralNetwork(schema)
   
 
   def calculate_eta(self):
