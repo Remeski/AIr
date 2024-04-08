@@ -5,7 +5,7 @@
 - Neuroverkkoja n stuff.
 - Your classic pytorch, tensorflow knockoff (sucky at best).
 - Tää on ihan vaa demo.
-- Eräänlainen harjoits/kokeilu neuroverkkojen parissa.
+- Eräänlainen harjoitus/kokeilu neuroverkkojen parissa.
 
 ## Vähän matematiikaa
 
