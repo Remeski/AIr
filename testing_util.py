@@ -1,17 +1,9 @@
-import math
 import matplotlib
 matplotlib.use("QtAgg")
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
-from AIr.tests import AI as testing
-import AIr.core as AI
-from AIr.data import MAA_FY_fiilis_millainen
-
-# plt.plot([x/1000 for x in range(0,7000)], [math.sin(x/1000) for x in range(0,7000)])
-# plt.show(block=False)
-schema_yo = {"n_input": len(MAA_FY_fiilis_millainen[0][0]), "layers": [{ "n": 100, "activation": "ReLU" }, { "n": 100, "activation": "Sigmoid" }, {"n": len(MAA_FY_fiilis_millainen[1][0]), "activation": "Sigmoid"}]}
 
 def plot_netw(netw, nrange=0, prange=7, precision=10000):
   if netw.schema["n_input"] != 1 or netw.schema["layers"][-1]["n"] != 1:
