@@ -153,17 +153,14 @@ class NeuralNetwork:
 
       _prev_dW = []
       _prev_dB = []
+
       for l, dw, db, dw2, db2 in zip(self.layers, dW, dB, self.prev_dW, self.prev_dB):
-        # print("dw", end="\r" if i != iterations-1 else "\n")
-        # print(dw, end="\r" if i != iterations-1 else "\n")
-        # print("db", end="\r" if i != iterations-1 else "\n")
-        # print(db, end="\r" if i != iterations-1 else "\n")
         w_inc = -(eta * dw + gamma * dw2)
-        # w_inc = -(eta * dw)
         b_inc = -(eta * db + gamma * db2)
-        # b_inc = -(eta * db)
+
         _prev_dW.append(w_inc)
         _prev_dB.append(b_inc)
+
         l.weights += w_inc
         l.biases += b_inc
 
@@ -182,9 +179,6 @@ class NeuralNetwork:
       elif not silent:
         print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
 
-    # except:
-    #     print(f"\nStopped at loss {round(self.cur_loss,9)}")
-
   def run(self, input):
     self.forward(input)
     return self.output
@@ -192,14 +186,6 @@ class NeuralNetwork:
   def test_loss(self, batch):
     self.forward(batch[0])
     return self.loss(batch[1])
-  # 
-  # def accuracy(self, Y):
-  #   return 1/len(Y) * np.sum(self.output / Y)
-  #
-  # def test_accuracy(self, batch):
-  #   self.forward(batch[0])
-  #   return self.accuracy(batch[1])
-  #
 
   def store(self, file_path: str):
     file_path = file_path.rstrip(".npz")
