@@ -104,9 +104,19 @@ class NeuralNetwork:
   # Batch is a tuple ([X], [Y]) where [X] is a matrix thats rows are one set of inputs
   #                                   [Y] is a matrix thats rows are the sets expected output 
   # If mini_batch_size is not specified, it will use batch GD.
-  def train(self, batch, silent=False, eta=0.1, gamma=0, mini_batch_size=0, epoch=1, fn=lambda self: None):
+  def train(self, batch, debug=False, silent=False, eta=0.1, gamma=0, mini_batch_size=0, epoch=1, fn=lambda self: None):
     X,Y = batch
-    batch_size = len(X)
+
+    batch_size = len(Y)
+
+    if debug:
+      print("Starting things")
+      print("X:")
+      print(X)
+      print("Y:")
+      print(Y)
+      print("length:")
+      print(batch_size)
 
     iterations = epoch
 
@@ -120,14 +130,26 @@ class NeuralNetwork:
       raise Exception(f"Invalid options, iterations: {iterations}")
 
     for i in range(iterations):
-      if mini_batch_size != 0:
+      if mini_batch_size > 0:
         start_index = i % (batch_size // mini_batch_size) * mini_batch_size
         end_index = start_index + mini_batch_size
         X,Y = (batch[0][start_index:end_index], batch[1][start_index:end_index])
 
+      if debug:
+        print("X:")
+        print(X)
+        print("Y:")
+        print(Y)
+
       self.forward(X)
 
       dW, dB = self.backprop(Y)
+
+      if debug:
+        print("dW:")
+        print(dW)
+        print("dB:")
+        print(dB)
 
       _prev_dW = []
       _prev_dB = []
@@ -152,7 +174,12 @@ class NeuralNetwork:
 
       self.cur_loss = self.loss(Y)
 
-      if not silent:
+      if debug:
+        print("loss:")
+        print(self.cur_loss)
+        time.sleep(2)
+
+      elif not silent:
         print(f"Done: {math.floor(round((i+1)/iterations, 2)*100)}%, loss at {round(self.cur_loss,9)}", end="\r" if i != iterations-1 else "\n")
 
     # except:

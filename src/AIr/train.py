@@ -1,5 +1,6 @@
 import os
 import random
+import time
 import numpy as np
 from .core import NeuralNetwork
 
@@ -10,9 +11,10 @@ def split_dataset(dataset, split):
   X = []
   Y = []
   for x,y in zip(dataset[0], dataset[1]):
-    if random.random() < split:
+    if random.random() > split:
       test_X.append(x)
       test_Y.append(y)
+      continue
     X.append(x)
     Y.append(y)
   return ((X,Y), (test_X, test_Y))
@@ -31,7 +33,7 @@ class Trainer:
       print("Specify schema or file_path")
       return
     else:
-      self.file_path = file_path if file_path is not None else "data.npz"
+      self.file_path = file_path + "-000" if file_path is not None else "model-000"
       self.network = NeuralNetwork(schema)
   
 
@@ -56,7 +58,7 @@ class Trainer:
   # gamma = momentum, if None => automatic
   # mini_batch_size = if None => automatic
   # noise = added randomness to dataset
-  def train(self, dataset, split=0.9, epoch=None, eta=None, gamma=None, mini_batch_size=0, noise=0.0):
+  def train(self, dataset, split=0.9, debug=False, silent=False, epoch=None, eta=None, gamma=None, mini_batch_size=0, noise=0.0):
     self.eta = eta
     self.gamma = gamma
     self.epoch = epoch
@@ -67,20 +69,33 @@ class Trainer:
       print("No training samples")
       return
 
-    training = True
-
     self.loss = 100
 
     try:
-      self.training_count = 0
-      while training:
+        self.training_count = int(self.file_path[-3:]) 
+    except:
+        self.training_count = 0
+
+    try:
+      print(f"[train-{convert_to_stamp(self.training_count)}] Training with dataset size {len(dataset[0])}, training batch size {len(training_batch[0])}, test batch size {len(test_batch[0])}") 
+      while True:
         self.eta = self.calculate_eta()
         self.gamma = self.calculate_gamma()
         self.epoch = self.calculate_epoch()
+
         k = 3
+
         self.training_count += 1
-        print(f"[train-{convert_to_stamp(self.training_count)}] Starting with eta {self.eta}, gamma {self.gamma} and epoch {self.epoch}") 
-        self.network.train((np.array(training_batch[0])+noise*np.random.choice([-1, 1], size=np.array(training_batch[0]).shape)*np.random.rand(*np.array(training_batch[0]).shape), training_batch[1]), epoch=self.epoch, eta=self.eta, gamma=self.gamma, mini_batch_size=mini_batch_size)
+
+        print(f"[train-{convert_to_stamp(self.training_count)}] Starting with mini batch size {mini_batch_size}, eta {self.eta}, gamma {self.gamma} and epoch {self.epoch}") 
+
+        self.network.train((np.array(training_batch[0])+noise*np.random.choice([-1, 1], size=np.array(training_batch[0]).shape)*np.random.rand(*np.array(training_batch[0]).shape), training_batch[1]),
+                           epoch=self.epoch,
+                           eta=self.eta,
+                           gamma=self.gamma,
+                           mini_batch_size=mini_batch_size,
+                           silent=silent,
+                           debug=debug)
 
         print(f"[train-{convert_to_stamp(self.training_count)}] Finished with loss {self.network.cur_loss}")
 
@@ -96,10 +111,13 @@ class Trainer:
               k += 3
             else:
               break
+        if debug:
+          time.sleep(2)
 
     except KeyboardInterrupt:
       print("Stopping")
 
     print(f"Finished training session")
-    self.network.store(file_path=self.file_path + f"-{convert_to_stamp(self.training_count)}")
+
+    self.network.store(file_path=self.file_path[:-4] + f"-{convert_to_stamp(self.training_count)}")
 
