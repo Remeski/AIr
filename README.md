@@ -1,3 +1,4 @@
+![tests](https://github.com/Remeski/AIr/actions/workflows/test.yml/badge.svg)
 # a breath of fresh AIr 🌪️
 
 ## Mistä kyse?
